@@ -3,6 +3,7 @@ import collections
 import logging
 import resolve_cm_tile
 from make_continent_image import build_map_image
+from make_civilized_layer import City_Maker
 
 Map_info=collections.namedtuple('Map_info',['cm_map','used_templates'])
 Quad_info=collections.namedtuple('Quad_info',['quad_template','used_templates'])
