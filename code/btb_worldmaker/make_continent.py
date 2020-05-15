@@ -23,7 +23,22 @@ def get_new_cm_map():
     cm_map=resolve_cm_tile.set_cm_map_values(map_info.cm_map)
     print_natural_map(cm_map)
     build_map_image(cm_map)
+    civ_m_inst=City_Maker(cm_map,8)
+    civ_m=civ_m_inst.get_civilized_map()
+    print_cities(civ_m)
 
+def print_cities(cm_map):
+    cnt=0
+    for i in range(50):
+        row=""
+        for j in range(50):
+            sym = "."
+            if (cm_map[i][j]['developed']):
+                sym = "E"
+                cnt+=1
+            row=row+" "+sym
+        print(row)
+    print(cnt)
 
 def print_map(cm_map):
     for i in range(50):

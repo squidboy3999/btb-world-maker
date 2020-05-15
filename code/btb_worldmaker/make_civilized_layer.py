@@ -12,38 +12,37 @@ class City_Maker:
       - For four nations each has 32 tiles in 1 quadrant (32 per nation)
       - For eight nations each has 16 tiles in 1 quadrant (16 per nation) 
     """
-    coast_arr=["di","nb","sb","eb","wb","swc","sec","nwc","nec","nc","sc","ec","wc","ns","ew"]
-    uninhabitable=["t","o","d"]
-    inhabitable=["f","g","r"]
-    map_size=50
-
 
     def __init__(self,cm_map,nation_cnt):
         self.cm_map=cm_map
         self.nation_cnt=nation_cnt
+        self.coast_arr=["di","nb","sb","eb","wb","swc","sec","nwc","nec","nc","sc","ec","wc","ns","ew"]
+        self.uninhabitable=["t","o","d"]
+        self.inhabitable=["f","g","r"]
+        self.map_size=50
 
-    def get_civilized_map(self,nation_cnt):
+    def get_civilized_map(self):
         """
            returns a civilized map
         """
-        civ_map=populate_civmap()
-        civ_map=create_cities(civ_map)
-        civ_map=define_nations(civ_map)
+        civ_map=self.populate_civmap()
+        civ_map=self.create_cities(civ_map)
+        civ_map=self.define_nations(civ_map)
         return civ_map
 
     def populate_civmap(self):
         civ_map=[]
-        for i in range(map_size):
+        for i in range(self.map_size):
             row=[]
-            for j in range(map_size):
+            for j in range(self.map_size):
                 row.append({
                     'terrain':self.cm_map[i][j],
-                    'poplation':get_basic_pop(self.cm_map[i][j]),
+                    'poplation':self.get_basic_pop(self.cm_map[i][j]),
                     'developed':False,
                     'move_cost':1,
                     'nation':'none'
                     })
-                civ_map.append(row)
+            civ_map.append(row)
         return civ_map
 
     def get_basic_pop(self,terrain):
@@ -59,16 +58,16 @@ class City_Maker:
         quad_split=False
         if (self.nation_cnt == 8):
             quad_split=True
-        civ_map=make_cities(0,0,civ_map,quad_split)
-        civ_map=make_cities(0,self.map_size/2,civ_map,quad_split)
-        civ_map=make_cities(self.map_size/2,0,civ_map,quad_split)
-        civ_map=make_cities(self.map_size/2,self.map_size/2,civ_map,quad_split)
+        civ_map=self.make_cities(0,0,civ_map,quad_split)
+        civ_map=self.make_cities(0,self.map_size/2,civ_map,quad_split)
+        civ_map=self.make_cities(self.map_size/2,0,civ_map,quad_split)
+        civ_map=self.make_cities(self.map_size/2,self.map_size/2,civ_map,quad_split)
         return civ_map
 
     def make_cities(self,start_row,start_col,civ_map,quad_split):
-        civ_map=cities_help(start_row,start_col,civ_map,quad_split)
+        civ_map=self.cities_help(int(start_row),int(start_col),civ_map,quad_split)
         if (quad_split):
-            civ_map=cities_help(start_row,start_col,civ_map,quad_split)
+            civ_map=self.cities_help(int(start_row),int(start_col),civ_map,quad_split)
         return civ_map
         
     def cities_help(self,start_row,start_col,civ_map,quad_split):
@@ -92,16 +91,16 @@ class City_Maker:
             elif (tiles_remaining>8):
                 size= randint(0,8)+1
             if size >9:
-                if verify_city(row_spot,col_spot,civ_map,2):
-                    civ_map=place_city(size,row_spot,col_spot,civ_map)
+                if self.verify_city(row_spot,col_spot,civ_map,2):
+                    civ_map=self.place_city(size,row_spot,col_spot,civ_map)
                     tiles_remaining-=size
             elif size >1:
-                if verify_city(row_spot,col_spot,civ_map,1):
-                    civ_map=place_city(size,row_spot,col_spot,civ_map)
+                if self.verify_city(row_spot,col_spot,civ_map,1):
+                    civ_map=self.place_city(size,row_spot,col_spot,civ_map)
                     tiles_remaining-=size
             else:
-                if verify_spot(row_spot,col_spot,civ_map):
-                    civ_map=place_spot(row_spot,col_spot,civ_map)
+                if self.verify_spot(row_spot,col_spot,civ_map):
+                    civ_map=self.place_spot(row_spot,col_spot,civ_map)
                     tiles_remaining-=1
             if cnt <1:
                 break
@@ -109,52 +108,52 @@ class City_Maker:
 
     def verify_city(self,row_spot,col_spot,civ_map,end):
         is_safe=True
-        if (((row_spot-1)>=0)and((col_spot-1)>=0)and((col_spot+end)<(map_size-1))and((row_spot+end)<(map_size-1))):
+        if (((row_spot-1)>=0)and((col_spot-1)>=0)and((col_spot+end)<(self.map_size-1))and((row_spot+end)<(self.map_size-1))):
             for i in range(row_spot-1,row_spot+end):
                 for j in range(col_spot-1,col_spot+end):
-                    if not verify_spot(i,j,civ_map):
+                    if not self.verify_spot(i,j,civ_map):
                         return False
         else:
             is_safe=False
         return is_safe
 
     def verify_spot(self,row_spot,col_spot,civ_map):
-        if civ_map[row_spot][col_spot].terrain in self.inhabitable:
-            if not civ_map[row_spot][col_spot].developed:
+        if civ_map[row_spot][col_spot]['terrain'] in self.inhabitable:
+            if not civ_map[row_spot][col_spot]['developed']:
                 return True
         return False
     
     def place_city(self,size,row_spot,col_spot,civ_map):
         if size==2:
-            civ_map=rand_two_spot(row_spot,col_spot,civ_map)
+            civ_map=self.rand_two_spot(row_spot,col_spot,civ_map)
         elif size==3:
-            civ_map=rand_three_spot(row_spot,col_spot,civ_map)
+            civ_map=self.rand_three_spot(row_spot,col_spot,civ_map)
         elif size==4:
-            civ_map=rand_four_spot(row_spot,col_spot,civ_map)
+            civ_map=self.rand_four_spot(row_spot,col_spot,civ_map)
         elif size==5:
-            civ_map=five_spot(row_spot,col_spot,civ_map)
+            civ_map=self.five_spot(row_spot,col_spot,civ_map)
         elif size==6:
-            civ_map=rand_six_spot(row_spot,col_spot,civ_map)
+            civ_map=self.rand_six_spot(row_spot,col_spot,civ_map)
         elif size==7:
-            civ_map=rand_seven_spot(row_spot,col_spot,civ_map)
+            civ_map=self.rand_seven_spot(row_spot,col_spot,civ_map)
         elif size==8:
-            civ_map=rand_eight_spot(row_spot,col_spot,civ_map)
+            civ_map=self.rand_eight_spot(row_spot,col_spot,civ_map)
         elif size==9:
-            civ_map=nine_spot(row_spot,col_spot,civ_map)
+            civ_map=self.nine_spot(row_spot,col_spot,civ_map)
         elif size==10:
-            civ_map=ten_spot(row_spot,col_spot,civ_map)
+            civ_map=self.ten_spot(row_spot,col_spot,civ_map)
         elif size==11:
-            civ_map=eleven_spot(row_spot,col_spot,civ_map)
+            civ_map=self.eleven_spot(row_spot,col_spot,civ_map)
         elif size==12:
-            civ_map=twelve_spot(row_spot,col_spot,civ_map)
+            civ_map=self.twelve_spot(row_spot,col_spot,civ_map)
         elif size==13:
-            civ_map=thirteen_spot(row_spot,col_spot,civ_map)
+            civ_map=self.thirteen_spot(row_spot,col_spot,civ_map)
         elif size==14:
-            civ_map=fourteen_spot(row_spot,col_spot,civ_map)
+            civ_map=self.fourteen_spot(row_spot,col_spot,civ_map)
         elif size==15:
-            civ_map=fifteen_spot(row_spot,col_spot,civ_map)
+            civ_map=self.fifteen_spot(row_spot,col_spot,civ_map)
         else:
-            civ_map=sixteen_spot(row_spot,col_spot,civ_map)
+            civ_map=self.sixteen_spot(row_spot,col_spot,civ_map)
         return civ_map
 
     def rand_two_spot(self,row_spot,col_spot,civ_map):
@@ -165,14 +164,14 @@ class City_Maker:
         """
         template=randint(0,3)
         if template==0:
-            civ_map=place_spot(row_spot-1,col_spot,civ_map)
+            civ_map=self.place_spot(row_spot-1,col_spot,civ_map)
         elif template==1:
-            civ_map=place_spot(row_spot,col_spot+1,civ_map)
+            civ_map=self.place_spot(row_spot,col_spot+1,civ_map)
         elif template==2:
-            civ_map=place_spot(row_spot+1,col_spot,civ_map)
+            civ_map=self.place_spot(row_spot+1,col_spot,civ_map)
         else:
-            civ_map=place_spot(row_spot,col_spot-1,civ_map)
-        civ_map=place_spot(row_spot,col_spot,civ_map)
+            civ_map=self.place_spot(row_spot,col_spot-1,civ_map)
+        civ_map=self.place_spot(row_spot,col_spot,civ_map)
         return civ_map
 
     def rand_three_spot(self,row_spot,col_spot,civ_map):
@@ -183,24 +182,24 @@ class City_Maker:
         """
         template=randint(0,5)
         if template==0:
-            civ_map=place_spot(row_spot-1,col_spot,civ_map)
-            civ_map=place_spot(row_spot,col_spot+1,civ_map)
+            civ_map=self.place_spot(row_spot-1,col_spot,civ_map)
+            civ_map=self.place_spot(row_spot,col_spot+1,civ_map)
         elif template==1:
-            civ_map=place_spot(row_spot-1,col_spot,civ_map)
-            civ_map=place_spot(row_spot+1,col_spot,civ_map)
+            civ_map=self.place_spot(row_spot-1,col_spot,civ_map)
+            civ_map=self.place_spot(row_spot+1,col_spot,civ_map)
         elif template==2:
-            civ_map=place_spot(row_spot-1,col_spot,civ_map)
-            civ_map=place_spot(row_spot,col_spot-1,civ_map)
+            civ_map=self.place_spot(row_spot-1,col_spot,civ_map)
+            civ_map=self.place_spot(row_spot,col_spot-1,civ_map)
         elif template==3:
-            civ_map=place_spot(row_spot+1,col_spot,civ_map)
-            civ_map=place_spot(row_spot,col_spot+1,civ_map)
+            civ_map=self.place_spot(row_spot+1,col_spot,civ_map)
+            civ_map=self.place_spot(row_spot,col_spot+1,civ_map)
         elif template==4:
-            civ_map=place_spot(row_spot,col_spot-1,civ_map)
-            civ_map=place_spot(row_spot,col_spot+1,civ_map)
+            civ_map=self.place_spot(row_spot,col_spot-1,civ_map)
+            civ_map=self.place_spot(row_spot,col_spot+1,civ_map)
         else:
-            civ_map=place_spot(row_spot,col_spot-1,civ_map)
-            civ_map=place_spot(row_spot+1,col_spot,civ_map)
-        civ_map=place_spot(row_spot,col_spot,civ_map)
+            civ_map=self.place_spot(row_spot,col_spot-1,civ_map)
+            civ_map=self.place_spot(row_spot+1,col_spot,civ_map)
+        civ_map=self.place_spot(row_spot,col_spot,civ_map)
         return civ_map
 
     def rand_four_spot(self,row_spot,col_spot,civ_map):
@@ -211,22 +210,22 @@ class City_Maker:
         """
         template=randint(0,3)
         if template==0:
-            civ_map=place_spot(row_spot-1,col_spot,civ_map)
-            civ_map=place_spot(row_spot,col_spot+1,civ_map)
-            civ_map=place_spot(row_spot+1,col_spot,civ_map)
+            civ_map=self.place_spot(row_spot-1,col_spot,civ_map)
+            civ_map=self.place_spot(row_spot,col_spot+1,civ_map)
+            civ_map=self.place_spot(row_spot+1,col_spot,civ_map)
         elif template==1:
-            civ_map=place_spot(row_spot,col_spot+1,civ_map)
-            civ_map=place_spot(row_spot,col_spot-1,civ_map)
-            civ_map=place_spot(row_spot-1,col_spot,civ_map)
+            civ_map=self.place_spot(row_spot,col_spot+1,civ_map)
+            civ_map=self.place_spot(row_spot,col_spot-1,civ_map)
+            civ_map=self.place_spot(row_spot-1,col_spot,civ_map)
         elif template==2:
-            civ_map=place_spot(row_spot+1,col_spot,civ_map)
-            civ_map=place_spot(row_spot,col_spot+1,civ_map)
-            civ_map=place_spot(row_spot,col_spot-1,civ_map)
+            civ_map=self.place_spot(row_spot+1,col_spot,civ_map)
+            civ_map=self.place_spot(row_spot,col_spot+1,civ_map)
+            civ_map=self.place_spot(row_spot,col_spot-1,civ_map)
         else:
-            civ_map=place_spot(row_spot-1,col_spot,civ_map)
-            civ_map=place_spot(row_spot,col_spot-1,civ_map)
-            civ_map=place_spot(row_spot+1,col_spot,civ_map)
-        civ_map=place_spot(row_spot,col_spot,civ_map)
+            civ_map=self.place_spot(row_spot-1,col_spot,civ_map)
+            civ_map=self.place_spot(row_spot,col_spot-1,civ_map)
+            civ_map=self.place_spot(row_spot+1,col_spot,civ_map)
+        civ_map=self.place_spot(row_spot,col_spot,civ_map)
         return civ_map
 
     def five_spot(self,row_spot,col_spot,civ_map):
@@ -235,11 +234,11 @@ class City_Maker:
            xxx   
            .x.   
         """
-        civ_map=place_spot(row_spot-1,col_spot,civ_map)
-        civ_map=place_spot(row_spot+1,col_spot,civ_map)
-        civ_map=place_spot(row_spot,col_spot-1,civ_map)
-        civ_map=place_spot(row_spot,col_spot+1,civ_map)
-        civ_map=place_spot(row_spot,col_spot,civ_map)
+        civ_map=self.place_spot(row_spot-1,col_spot,civ_map)
+        civ_map=self.place_spot(row_spot+1,col_spot,civ_map)
+        civ_map=self.place_spot(row_spot,col_spot-1,civ_map)
+        civ_map=self.place_spot(row_spot,col_spot+1,civ_map)
+        civ_map=self.place_spot(row_spot,col_spot,civ_map)
         return civ_map
 
     def rand_six_spot(self,row_spot,col_spot,civ_map):
@@ -250,30 +249,30 @@ class City_Maker:
         """ 
         template=randint(0,3)
         if template==0:
-            civ_map=place_spot(row_spot-1,col_spot-1,civ_map)
-            civ_map=place_spot(row_spot-1,col_spot,civ_map)
-            civ_map=place_spot(row_spot,col_spot-1,civ_map)
-            civ_map=place_spot(row_spot,col_spot+1,civ_map)
-            civ_map=place_spot(row_spot+1,col_spot,civ_map)
+            civ_map=self.place_spot(row_spot-1,col_spot-1,civ_map)
+            civ_map=self.place_spot(row_spot-1,col_spot,civ_map)
+            civ_map=self.place_spot(row_spot,col_spot-1,civ_map)
+            civ_map=self.place_spot(row_spot,col_spot+1,civ_map)
+            civ_map=self.place_spot(row_spot+1,col_spot,civ_map)
         elif template==1:
-            civ_map=place_spot(row_spot-1,col_spot+1,civ_map)
-            civ_map=place_spot(row_spot-1,col_spot,civ_map)
-            civ_map=place_spot(row_spot,col_spot-1,civ_map)
-            civ_map=place_spot(row_spot,col_spot+1,civ_map)
-            civ_map=place_spot(row_spot+1,col_spot,civ_map)
+            civ_map=self.place_spot(row_spot-1,col_spot+1,civ_map)
+            civ_map=self.place_spot(row_spot-1,col_spot,civ_map)
+            civ_map=self.place_spot(row_spot,col_spot-1,civ_map)
+            civ_map=self.place_spot(row_spot,col_spot+1,civ_map)
+            civ_map=self.place_spot(row_spot+1,col_spot,civ_map)
         elif template==2:
-            civ_map=place_spot(row_spot+1,col_spot+1,civ_map)
-            civ_map=place_spot(row_spot-1,col_spot,civ_map)
-            civ_map=place_spot(row_spot,col_spot-1,civ_map)
-            civ_map=place_spot(row_spot,col_spot+1,civ_map)
-            civ_map=place_spot(row_spot+1,col_spot,civ_map)
+            civ_map=self.place_spot(row_spot+1,col_spot+1,civ_map)
+            civ_map=self.place_spot(row_spot-1,col_spot,civ_map)
+            civ_map=self.place_spot(row_spot,col_spot-1,civ_map)
+            civ_map=self.place_spot(row_spot,col_spot+1,civ_map)
+            civ_map=self.place_spot(row_spot+1,col_spot,civ_map)
         else:
-            civ_map=place_spot(row_spot+1,col_spot-1,civ_map)
-            civ_map=place_spot(row_spot-1,col_spot,civ_map)
-            civ_map=place_spot(row_spot,col_spot-1,civ_map)
-            civ_map=place_spot(row_spot,col_spot+1,civ_map)
-            civ_map=place_spot(row_spot+1,col_spot,civ_map)
-        civ_map=place_spot(row_spot,col_spot,civ_map)
+            civ_map=self.place_spot(row_spot+1,col_spot-1,civ_map)
+            civ_map=self.place_spot(row_spot-1,col_spot,civ_map)
+            civ_map=self.place_spot(row_spot,col_spot-1,civ_map)
+            civ_map=self.place_spot(row_spot,col_spot+1,civ_map)
+            civ_map=self.place_spot(row_spot+1,col_spot,civ_map)
+        civ_map=self.place_spot(row_spot,col_spot,civ_map)
         return civ_map
 
     def rand_seven_spot(self,row_spot,col_spot,civ_map):
@@ -284,48 +283,48 @@ class City_Maker:
         """ 
         template=randint(0,5)
         if template==0:
-            civ_map=place_spot(row_spot-1,col_spot-1,civ_map)
-            civ_map=place_spot(row_spot-1,col_spot,civ_map)
-            civ_map=place_spot(row_spot,col_spot-1,civ_map)
-            civ_map=place_spot(row_spot,col_spot+1,civ_map)
-            civ_map=place_spot(row_spot+1,col_spot,civ_map)
-            civ_map=place_spot(row_spot+1,col_spot+1,civ_map)
+            civ_map=self.place_spot(row_spot-1,col_spot-1,civ_map)
+            civ_map=self.place_spot(row_spot-1,col_spot,civ_map)
+            civ_map=self.place_spot(row_spot,col_spot-1,civ_map)
+            civ_map=self.place_spot(row_spot,col_spot+1,civ_map)
+            civ_map=self.place_spot(row_spot+1,col_spot,civ_map)
+            civ_map=self.place_spot(row_spot+1,col_spot+1,civ_map)
         elif template==1:
-            civ_map=place_spot(row_spot-1,col_spot+1,civ_map)
-            civ_map=place_spot(row_spot-1,col_spot,civ_map)
-            civ_map=place_spot(row_spot,col_spot-1,civ_map)
-            civ_map=place_spot(row_spot,col_spot+1,civ_map)
-            civ_map=place_spot(row_spot+1,col_spot,civ_map)
-            civ_map=place_spot(row_spot+1,col_spot-1,civ_map)
+            civ_map=self.place_spot(row_spot-1,col_spot+1,civ_map)
+            civ_map=self.place_spot(row_spot-1,col_spot,civ_map)
+            civ_map=self.place_spot(row_spot,col_spot-1,civ_map)
+            civ_map=self.place_spot(row_spot,col_spot+1,civ_map)
+            civ_map=self.place_spot(row_spot+1,col_spot,civ_map)
+            civ_map=self.place_spot(row_spot+1,col_spot-1,civ_map)
         elif template==2:
-            civ_map=place_spot(row_spot-1,col_spot+1,civ_map)
-            civ_map=place_spot(row_spot-1,col_spot-1,civ_map)
-            civ_map=place_spot(row_spot-1,col_spot,civ_map)
-            civ_map=place_spot(row_spot,col_spot-1,civ_map)
-            civ_map=place_spot(row_spot,col_spot+1,civ_map)
-            civ_map=place_spot(row_spot+1,col_spot,civ_map)
+            civ_map=self.place_spot(row_spot-1,col_spot+1,civ_map)
+            civ_map=self.place_spot(row_spot-1,col_spot-1,civ_map)
+            civ_map=self.place_spot(row_spot-1,col_spot,civ_map)
+            civ_map=self.place_spot(row_spot,col_spot-1,civ_map)
+            civ_map=self.place_spot(row_spot,col_spot+1,civ_map)
+            civ_map=self.place_spot(row_spot+1,col_spot,civ_map)
         elif template==3:
-            civ_map=place_spot(row_spot+1,col_spot-1,civ_map)
-            civ_map=place_spot(row_spot+1,col_spot+1,civ_map)
-            civ_map=place_spot(row_spot-1,col_spot,civ_map)
-            civ_map=place_spot(row_spot,col_spot-1,civ_map)
-            civ_map=place_spot(row_spot,col_spot+1,civ_map)
-            civ_map=place_spot(row_spot+1,col_spot,civ_map)
+            civ_map=self.place_spot(row_spot+1,col_spot-1,civ_map)
+            civ_map=self.place_spot(row_spot+1,col_spot+1,civ_map)
+            civ_map=self.place_spot(row_spot-1,col_spot,civ_map)
+            civ_map=self.place_spot(row_spot,col_spot-1,civ_map)
+            civ_map=self.place_spot(row_spot,col_spot+1,civ_map)
+            civ_map=self.place_spot(row_spot+1,col_spot,civ_map)
         elif template==4:
-            civ_map=place_spot(row_spot-1,col_spot+1,civ_map)
-            civ_map=place_spot(row_spot-1,col_spot,civ_map)
-            civ_map=place_spot(row_spot,col_spot-1,civ_map)
-            civ_map=place_spot(row_spot,col_spot+1,civ_map)
-            civ_map=place_spot(row_spot+1,col_spot,civ_map)
-            civ_map=place_spot(row_spot+1,col_spot+1,civ_map)
+            civ_map=self.place_spot(row_spot-1,col_spot+1,civ_map)
+            civ_map=self.place_spot(row_spot-1,col_spot,civ_map)
+            civ_map=self.place_spot(row_spot,col_spot-1,civ_map)
+            civ_map=self.place_spot(row_spot,col_spot+1,civ_map)
+            civ_map=self.place_spot(row_spot+1,col_spot,civ_map)
+            civ_map=self.place_spot(row_spot+1,col_spot+1,civ_map)
         else:
-            civ_map=place_spot(row_spot+1,col_spot-1,civ_map)
-            civ_map=place_spot(row_spot-1,col_spot,civ_map)
-            civ_map=place_spot(row_spot,col_spot-1,civ_map)
-            civ_map=place_spot(row_spot,col_spot+1,civ_map)
-            civ_map=place_spot(row_spot+1,col_spot,civ_map)
-            civ_map=place_spot(row_spot+1,col_spot-1,civ_map)
-        civ_map=place_spot(row_spot,col_spot,civ_map)
+            civ_map=self.place_spot(row_spot+1,col_spot-1,civ_map)
+            civ_map=self.place_spot(row_spot-1,col_spot,civ_map)
+            civ_map=self.place_spot(row_spot,col_spot-1,civ_map)
+            civ_map=self.place_spot(row_spot,col_spot+1,civ_map)
+            civ_map=self.place_spot(row_spot+1,col_spot,civ_map)
+            civ_map=self.place_spot(row_spot+1,col_spot-1,civ_map)
+        civ_map=self.place_spot(row_spot,col_spot,civ_map)
         return civ_map
 
     def rand_eight_spot(self,row_spot,col_spot,civ_map):
@@ -336,38 +335,38 @@ class City_Maker:
         """ 
         template=randint(0,3)
         if template==0:
-            civ_map=place_spot(row_spot-1,col_spot+1,civ_map)
-            civ_map=place_spot(row_spot-1,col_spot,civ_map)
-            civ_map=place_spot(row_spot,col_spot-1,civ_map)
-            civ_map=place_spot(row_spot,col_spot+1,civ_map)
-            civ_map=place_spot(row_spot+1,col_spot-1,civ_map)
-            civ_map=place_spot(row_spot+1,col_spot,civ_map)
-            civ_map=place_spot(row_spot+1,col_spot+1,civ_map)
+            civ_map=self.place_spot(row_spot-1,col_spot+1,civ_map)
+            civ_map=self.place_spot(row_spot-1,col_spot,civ_map)
+            civ_map=self.place_spot(row_spot,col_spot-1,civ_map)
+            civ_map=self.place_spot(row_spot,col_spot+1,civ_map)
+            civ_map=self.place_spot(row_spot+1,col_spot-1,civ_map)
+            civ_map=self.place_spot(row_spot+1,col_spot,civ_map)
+            civ_map=self.place_spot(row_spot+1,col_spot+1,civ_map)
         elif template==1:
-            civ_map=place_spot(row_spot-1,col_spot-1,civ_map)
-            civ_map=place_spot(row_spot-1,col_spot,civ_map)
-            civ_map=place_spot(row_spot,col_spot-1,civ_map)
-            civ_map=place_spot(row_spot,col_spot+1,civ_map)
-            civ_map=place_spot(row_spot+1,col_spot-1,civ_map)
-            civ_map=place_spot(row_spot+1,col_spot,civ_map)
-            civ_map=place_spot(row_spot+1,col_spot+1,civ_map)
+            civ_map=self.place_spot(row_spot-1,col_spot-1,civ_map)
+            civ_map=self.place_spot(row_spot-1,col_spot,civ_map)
+            civ_map=self.place_spot(row_spot,col_spot-1,civ_map)
+            civ_map=self.place_spot(row_spot,col_spot+1,civ_map)
+            civ_map=self.place_spot(row_spot+1,col_spot-1,civ_map)
+            civ_map=self.place_spot(row_spot+1,col_spot,civ_map)
+            civ_map=self.place_spot(row_spot+1,col_spot+1,civ_map)
         elif template==2:
-            civ_map=place_spot(row_spot+1,col_spot+1,civ_map)
-            civ_map=place_spot(row_spot-1,col_spot,civ_map)
-            civ_map=place_spot(row_spot+1,col_spot-1,civ_map)
-            civ_map=place_spot(row_spot,col_spot-1,civ_map)
-            civ_map=place_spot(row_spot,col_spot+1,civ_map)
-            civ_map=place_spot(row_spot+1,col_spot,civ_map)
-            civ_map=place_spot(row_spot+1,col_spot-1,civ_map)
+            civ_map=self.place_spot(row_spot+1,col_spot+1,civ_map)
+            civ_map=self.place_spot(row_spot-1,col_spot,civ_map)
+            civ_map=self.place_spot(row_spot+1,col_spot-1,civ_map)
+            civ_map=self.place_spot(row_spot,col_spot-1,civ_map)
+            civ_map=self.place_spot(row_spot,col_spot+1,civ_map)
+            civ_map=self.place_spot(row_spot+1,col_spot,civ_map)
+            civ_map=self.place_spot(row_spot+1,col_spot-1,civ_map)
         else:
-            civ_map=place_spot(row_spot+1,col_spot+1,civ_map)
-            civ_map=place_spot(row_spot-1,col_spot,civ_map)
-            civ_map=place_spot(row_spot+1,col_spot-1,civ_map)
-            civ_map=place_spot(row_spot,col_spot-1,civ_map)
-            civ_map=place_spot(row_spot,col_spot+1,civ_map)
-            civ_map=place_spot(row_spot+1,col_spot,civ_map)
-            civ_map=place_spot(row_spot+1,col_spot+1,civ_map)
-        civ_map=place_spot(row_spot,col_spot,civ_map)
+            civ_map=self.place_spot(row_spot+1,col_spot+1,civ_map)
+            civ_map=self.place_spot(row_spot-1,col_spot,civ_map)
+            civ_map=self.place_spot(row_spot+1,col_spot-1,civ_map)
+            civ_map=self.place_spot(row_spot,col_spot-1,civ_map)
+            civ_map=self.place_spot(row_spot,col_spot+1,civ_map)
+            civ_map=self.place_spot(row_spot+1,col_spot,civ_map)
+            civ_map=self.place_spot(row_spot+1,col_spot+1,civ_map)
+        civ_map=self.place_spot(row_spot,col_spot,civ_map)
         return civ_map
 
     def nine_spot(self,row_spot,col_spot,civ_map):
@@ -376,15 +375,15 @@ class City_Maker:
            xxx   
            .x.   
         """
-        civ_map=place_spot(row_spot-1,col_spot-1,civ_map)
-        civ_map=place_spot(row_spot+1,col_spot-1,civ_map)
-        civ_map=place_spot(row_spot-1,col_spot,civ_map)
-        civ_map=place_spot(row_spot+1,col_spot,civ_map)
-        civ_map=place_spot(row_spot-1,col_spot+1,civ_map)
-        civ_map=place_spot(row_spot+1,col_spot+1,civ_map)
-        civ_map=place_spot(row_spot,col_spot-1,civ_map)
-        civ_map=place_spot(row_spot,col_spot+1,civ_map)
-        civ_map=place_spot(row_spot,col_spot,civ_map)
+        civ_map=self.place_spot(row_spot-1,col_spot-1,civ_map)
+        civ_map=self.place_spot(row_spot+1,col_spot-1,civ_map)
+        civ_map=self.place_spot(row_spot-1,col_spot,civ_map)
+        civ_map=self.place_spot(row_spot+1,col_spot,civ_map)
+        civ_map=self.place_spot(row_spot-1,col_spot+1,civ_map)
+        civ_map=self.place_spot(row_spot+1,col_spot+1,civ_map)
+        civ_map=self.place_spot(row_spot,col_spot-1,civ_map)
+        civ_map=self.place_spot(row_spot,col_spot+1,civ_map)
+        civ_map=self.place_spot(row_spot,col_spot,civ_map)
         return civ_map
 
     def ten_spot(self,row_spot,col_spot,civ_map):
@@ -392,19 +391,19 @@ class City_Maker:
            x.  .x  ..  ..
            ..  ..  x.  .x
         """
-        template=rantint(0,3)
+        template=randint(0,3)
         if template==0:
-            civ_map=nine_spot(row_spot,col_spot,civ_map)
-            civ_map=place_spot(row_spot+2,col_spot,civ_map)
+            civ_map=self.nine_spot(row_spot,col_spot,civ_map)
+            civ_map=self.place_spot(row_spot+2,col_spot,civ_map)
         elif template==1:
-            civ_map=nine_spot(row_spot,col_spot+1,civ_map)
-            civ_map=place_spot(row_spot+2,col_spot+1,civ_map)
+            civ_map=self.nine_spot(row_spot,col_spot+1,civ_map)
+            civ_map=self.place_spot(row_spot+2,col_spot+1,civ_map)
         elif template==2:
-            civ_map=nine_spot(row_spot+1,col_spot,civ_map)
-            civ_map=place_spot(row_spot-1,col_spot,civ_map)
+            civ_map=self.nine_spot(row_spot+1,col_spot,civ_map)
+            civ_map=self.place_spot(row_spot-1,col_spot,civ_map)
         else:
-            civ_map=nine_spot(row_spot+1,col_spot+1,civ_map)
-            civ_map=place_spot(row_spot-1,col_spot+1,civ_map)
+            civ_map=self.nine_spot(row_spot+1,col_spot+1,civ_map)
+            civ_map=self.place_spot(row_spot-1,col_spot+1,civ_map)
         return civ_map
 
     def eleven_spot(self,row_spot,col_spot,civ_map):
@@ -412,23 +411,23 @@ class City_Maker:
            x.  .x  ..  ..
            ..  ..  x.  .x
         """
-        template=rantint(0,3)
+        template=randint(0,3)
         if template==0:
-            civ_map=nine_spot(row_spot,col_spot,civ_map)
-            civ_map=place_spot(row_spot+2,col_spot,civ_map)
-            civ_map=place_spot(row_spot,col_spot+2,civ_map)
+            civ_map=self.nine_spot(row_spot,col_spot,civ_map)
+            civ_map=self.place_spot(row_spot+2,col_spot,civ_map)
+            civ_map=self.place_spot(row_spot,col_spot+2,civ_map)
         elif template==1:
-            civ_map=nine_spot(row_spot,col_spot+1,civ_map)
-            civ_map=place_spot(row_spot+2,col_spot+1,civ_map)
-            civ_map=place_spot(row_spot,col_spot-1,civ_map)
+            civ_map=self.nine_spot(row_spot,col_spot+1,civ_map)
+            civ_map=self.place_spot(row_spot+2,col_spot+1,civ_map)
+            civ_map=self.place_spot(row_spot,col_spot-1,civ_map)
         elif template==2:
-            civ_map=nine_spot(row_spot+1,col_spot,civ_map)
-            civ_map=place_spot(row_spot-1,col_spot,civ_map)
-            civ_map=place_spot(row_spot+1,col_spot+2,civ_map)
+            civ_map=self.nine_spot(row_spot+1,col_spot,civ_map)
+            civ_map=self.place_spot(row_spot-1,col_spot,civ_map)
+            civ_map=self.place_spot(row_spot+1,col_spot+2,civ_map)
         else:
-            civ_map=nine_spot(row_spot+1,col_spot+1,civ_map)
-            civ_map=place_spot(row_spot-1,col_spot+1,civ_map)
-            civ_map=place_spot(row_spot+1,col_spot-1,civ_map)
+            civ_map=self.nine_spot(row_spot+1,col_spot+1,civ_map)
+            civ_map=self.place_spot(row_spot-1,col_spot+1,civ_map)
+            civ_map=self.place_spot(row_spot+1,col_spot-1,civ_map)
         return civ_map
 
     def twelve_spot(self,row_spot,col_spot,civ_map):
@@ -436,27 +435,27 @@ class City_Maker:
            xx  x.  ..  .x
            ..  x.  xx  .x
         """
-        template=rantint(0,3)
+        template=randint(0,3)
         if template==0:
-            civ_map=nine_spot(row_spot,col_spot,civ_map)
-            civ_map=place_spot(row_spot-1,col_spot+2,civ_map)
-            civ_map=place_spot(row_spot,col_spot+2,civ_map)
-            civ_map=place_spot(row_spot+1,col_spot+2,civ_map)
+            civ_map=self.nine_spot(row_spot,col_spot,civ_map)
+            civ_map=self.place_spot(row_spot-1,col_spot+2,civ_map)
+            civ_map=self.place_spot(row_spot,col_spot+2,civ_map)
+            civ_map=self.place_spot(row_spot+1,col_spot+2,civ_map)
         elif template==1:
-            civ_map=nine_spot(row_spot,col_spot,civ_map)
-            civ_map=place_spot(row_spot+2,col_spot+1,civ_map)
-            civ_map=place_spot(row_spot+2,col_spot,civ_map)
-            civ_map=place_spot(row_spot+2,col_spot-1,civ_map)
+            civ_map=self.nine_spot(row_spot,col_spot,civ_map)
+            civ_map=self.place_spot(row_spot+2,col_spot+1,civ_map)
+            civ_map=self.place_spot(row_spot+2,col_spot,civ_map)
+            civ_map=self.place_spot(row_spot+2,col_spot-1,civ_map)
         elif template==2:
-            civ_map=nine_spot(row_spot+1,col_spot+1,civ_map)
-            civ_map=place_spot(row_spot,col_spot-1,civ_map)
-            civ_map=place_spot(row_spot+1,col_spot-1,civ_map)
-            civ_map=place_spot(row_spot+2,col_spot-1,civ_map)
+            civ_map=self.nine_spot(row_spot+1,col_spot+1,civ_map)
+            civ_map=self.place_spot(row_spot,col_spot-1,civ_map)
+            civ_map=self.place_spot(row_spot+1,col_spot-1,civ_map)
+            civ_map=self.place_spot(row_spot+2,col_spot-1,civ_map)
         else:
-            civ_map=nine_spot(row_spot+1,col_spot+1,civ_map)
-            civ_map=place_spot(row_spot-1,col_spot+2,civ_map)
-            civ_map=place_spot(row_spot-1,col_spot+1,civ_map)
-            civ_map=place_spot(row_spot-1,col_spot,civ_map)
+            civ_map=self.nine_spot(row_spot+1,col_spot+1,civ_map)
+            civ_map=self.place_spot(row_spot-1,col_spot+2,civ_map)
+            civ_map=self.place_spot(row_spot-1,col_spot+1,civ_map)
+            civ_map=self.place_spot(row_spot-1,col_spot,civ_map)
         return civ_map
 
     def thirteen_spot(self,row_spot,col_spot,civ_map):
@@ -466,31 +465,31 @@ class City_Maker:
            xxxx   xxxx   xxxx  xxxx
            .xx.   .xx.   .xxx  xxx.
         """
-        template=rantint(0,3)
+        template=randint(0,3)
         if template==0:
-            civ_map=nine_spot(row_spot,col_spot,civ_map)
-            civ_map=place_spot(row_spot,col_spot+2,civ_map)
-            civ_map=place_spot(row_spot+1,col_spot+2,civ_map)
-            civ_map=place_spot(row_spot+2,col_spot,civ_map)
-            civ_map=place_spot(row_spot+2,col_spot+1,civ_map)
+            civ_map=self.nine_spot(row_spot,col_spot,civ_map)
+            civ_map=self.place_spot(row_spot,col_spot+2,civ_map)
+            civ_map=self.place_spot(row_spot+1,col_spot+2,civ_map)
+            civ_map=self.place_spot(row_spot+2,col_spot,civ_map)
+            civ_map=self.place_spot(row_spot+2,col_spot+1,civ_map)
         elif template==1:
-            civ_map=nine_spot(row_spot,col_spot+1,civ_map)
-            civ_map=place_spot(row_spot,col_spot-1,civ_map)
-            civ_map=place_spot(row_spot+1,col_spot-1,civ_map)
-            civ_map=place_spot(row_spot+2,col_spot,civ_map)
-            civ_map=place_spot(row_spot+2,col_spot+1,civ_map)
+            civ_map=self.nine_spot(row_spot,col_spot+1,civ_map)
+            civ_map=self.place_spot(row_spot,col_spot-1,civ_map)
+            civ_map=self.place_spot(row_spot+1,col_spot-1,civ_map)
+            civ_map=self.place_spot(row_spot+2,col_spot,civ_map)
+            civ_map=self.place_spot(row_spot+2,col_spot+1,civ_map)
         elif template==2:
-            civ_map=nine_spot(row_spot+1,col_spot+1,civ_map)
-            civ_map=place_spot(row_spot-1,col_spot,civ_map)
-            civ_map=place_spot(row_spot-1,col_spot+1,civ_map)
-            civ_map=place_spot(row_spot,col_spot-1,civ_map)
-            civ_map=place_spot(row_spot+1,col_spot-1,civ_map)
+            civ_map=self.nine_spot(row_spot+1,col_spot+1,civ_map)
+            civ_map=self.place_spot(row_spot-1,col_spot,civ_map)
+            civ_map=self.place_spot(row_spot-1,col_spot+1,civ_map)
+            civ_map=self.place_spot(row_spot,col_spot-1,civ_map)
+            civ_map=self.place_spot(row_spot+1,col_spot-1,civ_map)
         else:
-            civ_map=nine_spot(row_spot+1,col_spot,civ_map)
-            civ_map=place_spot(row_spot-1,col_spot,civ_map)
-            civ_map=place_spot(row_spot-1,col_spot+1,civ_map)
-            civ_map=place_spot(row_spot,col_spot+2,civ_map)
-            civ_map=place_spot(row_spot+1,col_spot+2,civ_map)
+            civ_map=self.nine_spot(row_spot+1,col_spot,civ_map)
+            civ_map=self.place_spot(row_spot-1,col_spot,civ_map)
+            civ_map=self.place_spot(row_spot-1,col_spot+1,civ_map)
+            civ_map=self.place_spot(row_spot,col_spot+2,civ_map)
+            civ_map=self.place_spot(row_spot+1,col_spot+2,civ_map)
 
         return civ_map
 
@@ -501,21 +500,21 @@ class City_Maker:
            xxxx   xxxx
            .xxx   xxx.
         """
-        template=rantint(0,1)
+        template=randint(0,1)
         if template==0:
-            civ_map=nine_spot(row_spot,col_spot,civ_map)
-            civ_map=place_spot(row_spot+2,col_spot+2,civ_map)
-            civ_map=place_spot(row_spot+2,col_spot+1,civ_map)
-            civ_map=place_spot(row_spot+2,col_spot,civ_map)
-            civ_map=place_spot(row_spot,col_spot+2,civ_map)
-            civ_map=place_spot(row_spot+1,col_spot+2,civ_map)
+            civ_map=self.nine_spot(row_spot,col_spot,civ_map)
+            civ_map=self.place_spot(row_spot+2,col_spot+2,civ_map)
+            civ_map=self.place_spot(row_spot+2,col_spot+1,civ_map)
+            civ_map=self.place_spot(row_spot+2,col_spot,civ_map)
+            civ_map=self.place_spot(row_spot,col_spot+2,civ_map)
+            civ_map=self.place_spot(row_spot+1,col_spot+2,civ_map)
         else:
-            civ_map=nine_spot(row_spot+1,col_spot,civ_map)
-            civ_map=place_spot(row_spot-1,col_spot+2,civ_map)
-            civ_map=place_spot(row_spot-1,col_spot+1,civ_map)
-            civ_map=place_spot(row_spot-1,col_spot,civ_map)
-            civ_map=place_spot(row_spot,col_spot+2,civ_map)
-            civ_map=place_spot(row_spot+1,col_spot+2,civ_map)
+            civ_map=self.nine_spot(row_spot+1,col_spot,civ_map)
+            civ_map=self.place_spot(row_spot-1,col_spot+2,civ_map)
+            civ_map=self.place_spot(row_spot-1,col_spot+1,civ_map)
+            civ_map=self.place_spot(row_spot-1,col_spot,civ_map)
+            civ_map=self.place_spot(row_spot,col_spot+2,civ_map)
+            civ_map=self.place_spot(row_spot+1,col_spot+2,civ_map)
 
         return civ_map
 
@@ -526,39 +525,39 @@ class City_Maker:
            xxxx   xxxx   xxxx  xxxx
            xxx.   .xxx   xxxx  xxxx
         """
-        template=rantint(0,3)
+        template=randint(0,3)
         if template==0:
-            civ_map=nine_spot(row_spot,col_spot,civ_map)
-            civ_map=place_spot(row_spot-1,col_spot+2,civ_map)
-            civ_map=place_spot(row_spot,col_spot+2,civ_map)
-            civ_map=place_spot(row_spot+1,col_spot+2,civ_map)
-            civ_map=place_spot(row_spot+2,col_spot-1,civ_map)
-            civ_map=place_spot(row_spot+2,col_spot,civ_map)
-            civ_map=place_spot(row_spot+2,col_spot+1,civ_map)
+            civ_map=self.nine_spot(row_spot,col_spot,civ_map)
+            civ_map=self.place_spot(row_spot-1,col_spot+2,civ_map)
+            civ_map=self.place_spot(row_spot,col_spot+2,civ_map)
+            civ_map=self.place_spot(row_spot+1,col_spot+2,civ_map)
+            civ_map=self.place_spot(row_spot+2,col_spot-1,civ_map)
+            civ_map=self.place_spot(row_spot+2,col_spot,civ_map)
+            civ_map=self.place_spot(row_spot+2,col_spot+1,civ_map)
         elif template==1:
-            civ_map=nine_spot(row_spot,col_spot+1,civ_map)
-            civ_map=place_spot(row_spot-1,col_spot-1,civ_map)
-            civ_map=place_spot(row_spot,col_spot-1,civ_map)
-            civ_map=place_spot(row_spot+1,col_spot-1,civ_map)
-            civ_map=place_spot(row_spot+2,col_spot,civ_map)
-            civ_map=place_spot(row_spot+2,col_spot+1,civ_map)
-            civ_map=place_spot(row_spot+2,col_spot+2,civ_map)
+            civ_map=self.nine_spot(row_spot,col_spot+1,civ_map)
+            civ_map=self.place_spot(row_spot-1,col_spot-1,civ_map)
+            civ_map=self.place_spot(row_spot,col_spot-1,civ_map)
+            civ_map=self.place_spot(row_spot+1,col_spot-1,civ_map)
+            civ_map=self.place_spot(row_spot+2,col_spot,civ_map)
+            civ_map=self.place_spot(row_spot+2,col_spot+1,civ_map)
+            civ_map=self.place_spot(row_spot+2,col_spot+2,civ_map)
         elif template==2:
-            civ_map=nine_spot(row_spot+1,col_spot,civ_map)
-            civ_map=place_spot(row_spot-1,col_spot-1,civ_map)
-            civ_map=place_spot(row_spot,col_spot-1,civ_map)
-            civ_map=place_spot(row_spot+1,col_spot-1,civ_map)
-            civ_map=place_spot(row_spot-1,col_spot,civ_map)
-            civ_map=place_spot(row_spot-1,col_spot+1,civ_map)
-            civ_map=place_spot(row_spot-1,col_spot+2,civ_map)
+            civ_map=self.nine_spot(row_spot+1,col_spot,civ_map)
+            civ_map=self.place_spot(row_spot-1,col_spot-1,civ_map)
+            civ_map=self.place_spot(row_spot,col_spot-1,civ_map)
+            civ_map=self.place_spot(row_spot+1,col_spot-1,civ_map)
+            civ_map=self.place_spot(row_spot-1,col_spot,civ_map)
+            civ_map=self.place_spot(row_spot-1,col_spot+1,civ_map)
+            civ_map=self.place_spot(row_spot-1,col_spot+2,civ_map)
         else:
-            civ_map=nine_spot(row_spot+1,col_spot+1,civ_map)
-            civ_map=place_spot(row_spot-1,col_spot+2,civ_map)
-            civ_map=place_spot(row_spot,col_spot+2,civ_map)
-            civ_map=place_spot(row_spot+1,col_spot+2,civ_map)
-            civ_map=place_spot(row_spot-1,col_spot-1,civ_map)
-            civ_map=place_spot(row_spot-1,col_spot,civ_map)
-            civ_map=place_spot(row_spot-1,col_spot+1,civ_map)
+            civ_map=self.nine_spot(row_spot+1,col_spot+1,civ_map)
+            civ_map=self.place_spot(row_spot-1,col_spot+2,civ_map)
+            civ_map=self.place_spot(row_spot,col_spot+2,civ_map)
+            civ_map=self.place_spot(row_spot+1,col_spot+2,civ_map)
+            civ_map=self.place_spot(row_spot-1,col_spot-1,civ_map)
+            civ_map=self.place_spot(row_spot-1,col_spot,civ_map)
+            civ_map=self.place_spot(row_spot-1,col_spot+1,civ_map)
 
         return civ_map
 
@@ -568,26 +567,26 @@ class City_Maker:
            xxx   
            xxx   
         """
-        civ_map=place_spot(row_spot-1,col_spot-1,civ_map)
-        civ_map=place_spot(row_spot+1,col_spot-1,civ_map)
-        civ_map=place_spot(row_spot-1,col_spot,civ_map)
-        civ_map=place_spot(row_spot+1,col_spot,civ_map)
-        civ_map=place_spot(row_spot-1,col_spot+1,civ_map)
-        civ_map=place_spot(row_spot+1,col_spot+1,civ_map)
-        civ_map=place_spot(row_spot,col_spot-1,civ_map)
-        civ_map=place_spot(row_spot,col_spot+1,civ_map)
-        civ_map=place_spot(row_spot,col_spot,civ_map)
-        civ_map=place_spot(row_spot+2,col_spot-1,civ_map)
-        civ_map=place_spot(row_spot+2,col_spot,civ_map)
-        civ_map=place_spot(row_spot+2,col_spot+1,civ_map)
-        civ_map=place_spot(row_spot+2,col_spot+2,civ_map)
-        civ_map=place_spot(row_spot+1,col_spot+2,civ_map)
-        civ_map=place_spot(row_spot,col_spot+2,civ_map)
-        civ_map=place_spot(row_spot-1,col_spot+2,civ_map)
+        civ_map=self.place_spot(row_spot-1,col_spot-1,civ_map)
+        civ_map=self.place_spot(row_spot+1,col_spot-1,civ_map)
+        civ_map=self.place_spot(row_spot-1,col_spot,civ_map)
+        civ_map=self.place_spot(row_spot+1,col_spot,civ_map)
+        civ_map=self.place_spot(row_spot-1,col_spot+1,civ_map)
+        civ_map=self.place_spot(row_spot+1,col_spot+1,civ_map)
+        civ_map=self.place_spot(row_spot,col_spot-1,civ_map)
+        civ_map=self.place_spot(row_spot,col_spot+1,civ_map)
+        civ_map=self.place_spot(row_spot,col_spot,civ_map)
+        civ_map=self.place_spot(row_spot+2,col_spot-1,civ_map)
+        civ_map=self.place_spot(row_spot+2,col_spot,civ_map)
+        civ_map=self.place_spot(row_spot+2,col_spot+1,civ_map)
+        civ_map=self.place_spot(row_spot+2,col_spot+2,civ_map)
+        civ_map=self.place_spot(row_spot+1,col_spot+2,civ_map)
+        civ_map=self.place_spot(row_spot,col_spot+2,civ_map)
+        civ_map=self.place_spot(row_spot-1,col_spot+2,civ_map)
         return civ_map
 
     def place_spot(self,row_spot,col_spot,civ_map):
-        civ_map[row_spot][col_spot].developed=True
+        civ_map[row_spot][col_spot]['developed']=True
         return civ_map
 
     def define_nations(self,civ_map):
