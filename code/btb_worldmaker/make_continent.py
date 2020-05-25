@@ -4,6 +4,7 @@ import logging
 import resolve_cm_tile
 from make_continent_image import build_map_image
 from make_civilized_layer import City_Maker
+from nation_creation import Nation_Maker
 
 Map_info=collections.namedtuple('Map_info',['cm_map','used_templates'])
 Quad_info=collections.namedtuple('Quad_info',['quad_template','used_templates'])
@@ -26,6 +27,9 @@ def get_new_cm_map():
     civ_m_inst=City_Maker(cm_map,8)
     civ_m=civ_m_inst.get_civilized_map()
     print_cities(civ_m)
+    nation_map_inst=Nation_Maker(civ_m,civ_m_inst.unclaimed_land,civ_m_inst.cities)
+    nation_map=nation_map_inst.assign_territory()
+    nation_map_inst.print_cm_map()
 
 def print_cities(cm_map):
     cnt=0

@@ -1,6 +1,7 @@
 from random import randint
 import collections
 import logging
+import queue
 
 
 class City_Maker:
@@ -20,6 +21,8 @@ class City_Maker:
         self.uninhabitable=["t","o","d"]
         self.inhabitable=["f","g","r"]
         self.map_size=50
+        self.unclaimed_land=0
+        self.cities=queue.Queue()
 
 
     def get_civilized_map(self):
@@ -36,6 +39,8 @@ class City_Maker:
         for i in range(self.map_size):
             row=[]
             for j in range(self.map_size):
+                if self.cm_map[i][j] != "o":
+                    self.unclaimed_land+=1
                 row.append({
                     'terrain':self.cm_map[i][j],
                     'poplation':self.get_basic_pop(self.cm_map[i][j]),
@@ -394,7 +399,7 @@ class City_Maker:
         civ_map=self.place_spot(row_spot,col_spot,civ_map,nation_num)
         return civ_map
 
-    def ten_spot(self,row_spot,col_spot,civ_map,nation_num:
+    def ten_spot(self,row_spot,col_spot,civ_map,nation_num):
         """
            x.  .x  ..  ..
            ..  ..  x.  .x
@@ -595,7 +600,9 @@ class City_Maker:
 
     def place_spot(self,row_spot,col_spot,civ_map,nation_num):
         civ_map[row_spot][col_spot]['developed']=True
-        iv_map[row_spot][col_spot]['nation']=nation_num
+        civ_map[row_spot][col_spot]['nation']=nation_num
+        self.unclaimed_land-=1
+        self.cities.put([row_spot,col_spot])
         return civ_map
 
     def define_nations(self,civ_map):
