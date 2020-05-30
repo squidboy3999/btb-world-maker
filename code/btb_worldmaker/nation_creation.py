@@ -19,18 +19,32 @@ class Nation_Maker:
         self.cities_a=cities
         self.cities_b=queue.Queue()
         self.map_size=50
+        self.nm_logger=logging.getLogger('')
+        # handlers
+        c_handler =logging.StreamHandler()
+        f_handler = logging.FileHandler('nation_maker.log')
+        self.nm_logger.setLevel(logging.INFO)
+        # formatters
+        c_format=logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        c_handler.setFormatter(c_format)
+        f_handler.setFormatter(c_format)
+        # add handlers
+        self.nm_logger.addHandler(c_handler)
+        self.nm_logger.addHandler(f_handler)
+        self.nm_logger.info('--- Logger Initilialized ---')
 
     def assign_territory(self):
         cur_q="a"
         cnt=0
         while self.land_cnt >0:
             cnt+=1
+            self.nm_logger.info('Remaining land count: {}'.format(self.land_cnt))
             if cur_q=="a":
                 while not self.cities_a.empty():
                     cur_city_spot=self.cities_a.get()
                     self.cities_b.put(cur_city_spot)
                     self.claim_territory(cur_city_spot)
-                    if self.land_cnt >0:
+                    if self.land_cnt <1:
                         return self.cm_map
                 cur_q="b"
             else:
@@ -38,7 +52,7 @@ class Nation_Maker:
                     cur_city_spot=self.cities_b.get()
                     self.cities_a.put(cur_city_spot)
                     self.claim_territory(cur_city_spot)
-                    if self.land_cnt >0:
+                    if self.land_cnt <1:
                         return self.cm_map
                 cur_q="a"
             if cnt > 2500:
@@ -48,11 +62,43 @@ class Nation_Maker:
         return self.cm_map
 
     def print_cm_map(self):
+        cnt_1=0
+        cnt_2=0
+        cnt_3=0
+        cnt_4=0
+        cnt_5=0
+        cnt_6=0
+        cnt_7=0
+        cnt_8=0
         for i in range(self.map_size):
             line =""
             for j in range(self.map_size):
                 line=line+str(self.cm_map[i][j]["nation"])+" "
+                if self.cm_map[i][j]["nation"]==1:
+                    cnt_1+=1
+                elif self.cm_map[i][j]["nation"]==2:
+                    cnt_2+=1 
+                elif self.cm_map[i][j]["nation"]==3:
+                    cnt_3+=1
+                elif self.cm_map[i][j]["nation"]==4:
+                    cnt_4+=1
+                elif self.cm_map[i][j]["nation"]==5:
+                    cnt_5+=1 
+                elif self.cm_map[i][j]["nation"]==6:
+                    cnt_6+=1
+                elif self.cm_map[i][j]["nation"]==7:
+                    cnt_7+=1
+                elif self.cm_map[i][j]["nation"]==8:
+                    cnt_8+=1
             print(line)
+        self.nm_logger.info('Count for nation 1: {}'.format(cnt_1))
+        self.nm_logger.info('Count for nation 2: {}'.format(cnt_2))
+        self.nm_logger.info('Count for nation 3: {}'.format(cnt_3))
+        self.nm_logger.info('Count for nation 4: {}'.format(cnt_4))
+        self.nm_logger.info('Count for nation 5: {}'.format(cnt_5))
+        self.nm_logger.info('Count for nation 6: {}'.format(cnt_6))
+        self.nm_logger.info('Count for nation 7: {}'.format(cnt_7))
+        self.nm_logger.info('Count for nation 8: {}'.format(cnt_8))
 
     def claim_territory(self,cur_city_spot):
         for i in range(self.map_size):
@@ -62,8 +108,10 @@ class Nation_Maker:
 
     def place_in_radius(self,radius,city_spot):
         if len(city_spot)==2:
+
             row=city_spot[0]
             col=city_spot[1]
+            self.nm_logger.info('--- Place in radius: {} - row: {} , col: {} ---'.format(radius,row,col))
             nation=self.cm_map[row][col]["nation"]
             if self.try_corners(city_spot,radius,nation):
                 return True
@@ -118,10 +166,14 @@ class Nation_Maker:
     def try_spot(self,modifier,city_spot,nation):
         row=city_spot[0]+modifier[0]
         col=city_spot[1]+modifier[1]
-        if self.cm_map[row][col]["terrain"] != "o" and self.cm_map[row][col]["nation"] == 0:
-            self.cm_map[row][col]["nation"]=nation
-            self.land_cnt-=1
-            return True
+        if row < self.map_size and col < self.map_size and row >=0 and col >=0:
+            if self.cm_map[row][col]["terrain"] != "o" and self.cm_map[row][col]["nation"] == 0:
+                self.cm_map[row][col]["nation"]=nation
+                self.land_cnt-=1
+                return True
+            else:
+                print("location row - {} col - {} -not set".format(row,col))
+                return False
         else:
-            print("location row - {} col - {} -not set".format(row,col))
+            print("location row - {} col - {} -out of bounds".format(row,col))
             return False
