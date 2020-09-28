@@ -30,6 +30,7 @@ def get_new_cm_map():
     nation_map_inst=Nation_Maker(civ_m,civ_m_inst.unclaimed_land,civ_m_inst.cities)
     nation_map=nation_map_inst.assign_territory()
     nation_map_inst.print_cm_map()
+    nation_map_inst.map_to_file()
 
 def print_cities(cm_map):
     cnt=0

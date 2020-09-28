@@ -1,7 +1,7 @@
 import collections
 import logging
 import queue
-
+import json
 
 class Nation_Maker:
     """
@@ -60,6 +60,10 @@ class Nation_Maker:
                 return self.cm_map
         print('Appears to be no unclaimed land')
         return self.cm_map
+    
+    def map_to_file(self):
+        with open('cm_map.json','w') as fp:
+            json.dump(self.cm_map, fp,indent=4)
 
     def print_cm_map(self):
         cnt_1=0

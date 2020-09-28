@@ -1,3 +1,4 @@
 *.pyc
 *.log
 btb_world_maker/images/new_background.jpg
+*.json
